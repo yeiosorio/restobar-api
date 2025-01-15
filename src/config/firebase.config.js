@@ -1,11 +1,14 @@
 const admin = require('firebase-admin');
+require('dotenv').config();
 
-// Inicialización de Firebase Admin
-const serviceAccount = require('../config/firebase-credentials.json');
-
+// Inicialización de Firebase Admin usando variables de entorno
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "restobar-33413.firebasestorage.app",
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL
+  }),
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
 });
 
 const bucket = admin.storage().bucket();
