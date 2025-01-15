@@ -18,22 +18,24 @@ const uploadImage = async (req, res) => {
 
     // Subir a Firebase Storage
     const file = bucket.file(fileName);
-    await file.save(processedImageBuffer, {
+    const options = {
       metadata: {
         contentType: 'image/png',
       },
-    });
+      public: true, // Hacer el archivo públicamente accesible
+      validation: 'md5'
+    };
+
+    // Subir el archivo
+    await file.save(processedImageBuffer, options);
 
     // Obtener URL pública
-    const [url] = await file.getSignedUrl({
-      action: 'read',
-      expires: '03-01-2500', // URL permanente
-    });
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
 
     // Guardar metadata en Firestore
     const imageDoc = {
       fileName,
-      url,
+      url: publicUrl,
       uploadDate: new Date(),
       userName: req.body.userName || 'Anonymous',
       originalName: req.file.originalname,
@@ -48,7 +50,10 @@ const uploadImage = async (req, res) => {
 
   } catch (error) {
     console.error('Error al procesar la imagen:', error);
-    res.status(500).json({ error: 'Error al procesar la imagen' });
+    res.status(500).json({ 
+      error: 'Error al procesar la imagen',
+      details: error.message 
+    });
   }
 };
 
@@ -79,7 +84,10 @@ const getImagesByDateRange = async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener imágenes:', error);
-    res.status(500).json({ error: 'Error al obtener imágenes' });
+    res.status(500).json({ 
+      error: 'Error al obtener imágenes',
+      details: error.message 
+    });
   }
 };
 
@@ -112,7 +120,10 @@ const getImagesPerHour = async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener estadísticas:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas' });
+    res.status(500).json({ 
+      error: 'Error al obtener estadísticas',
+      details: error.message 
+    });
   }
 };
 
